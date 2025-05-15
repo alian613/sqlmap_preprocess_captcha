@@ -1,0 +1,1 @@
+# sqlmap needs this file to treat the directory as a module.
