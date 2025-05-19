@@ -3,18 +3,26 @@
 Bypass CAPTCHA challenges automatically during `sqlmap` injection testing.  
 This tool automatically solve CAPTCHA challenges during a `sqlmap` injection test by fetching the CAPTCHA image, performing OCR (either via Tesseract or a PyTorch model), and appending the result to your POST data.
 
+- Tesseract OCR: Only capable of recognizing basic CAPTCHA  
+  Examples:  
+  ![Tesseract example](docs/tesseract_captcha.png)
+
+
+- PyTorch: With a custom-trained model, it can recognize more complex CAPTCHA (requires implementing predict.py in the same directory)  
+  Examples:  
+  ![PyTorch example1](docs/pytorch_captcha1.png)  
+  ![PyTorch example2](docs/pytorch_captcha2.png)
+  > OCR CAPTCHA model training tool available in my other project:
+  🔗 [https://github.com/alian613/ocr_captcha](https://github.com/alian613/ocr_captcha)
+
+
 📖 [中文說明文件](README_zh.md)
 
 ## Features
 
 - ✅ Automatically **bypasses CAPTCHA** protections for automated SQLmap testing
-- ✅ Supports basic OCR using Tesseract, for example:  
-  ![Tesseract example](docs/tesseract_captcha.png)
-- ✅ Supports advanced OCR using your own PyTorch model (`predict.py`), for example:  
-  ![PyTorch example1](docs/pytorch_captcha1.png)  
-  ![PyTorch example2](docs/pytorch_captcha2.png)
-  > OCR CAPTCHA model training tool available in my other project:
-  🔗 [https://github.com/alian613/ocr_captcha](https://github.com/alian613/ocr_captcha)
+- ✅ Supports basic OCR using Tesseract.
+- ✅ Supports advanced OCR using your own PyTorch model.
 - ✅ Compatible with `sqlmap`'s `--preprocess` option
 
 
@@ -34,11 +42,13 @@ apt install tesseract-ocr
 
 ### 3. Install required Python packages:
 
+Before running the program, install the necessary Python packages:
 ```bash
 pip install -r requirements.txt
 ````
 
-If you're using Python 3.11+
+
+If you're using Python 3.11+  
 It's recommended to use a virtual environment:
 ```bash
 python -m venv venv
@@ -47,9 +57,8 @@ pip install -r requirements.txt
 python /usr/share/sqlmap/sqlmap.py -u ... --dbs
 ```
 
-Before running the script, install the necessary Python packages:
 
-### (Optional) PyTorch OCR model
+### [ Optional ] PyTorch OCR model
 > Skip this step if you don't use a custom model.
 - Set `USE_PYTORCH = True` in `preprocess_captcha.py`
 - Make sure you have a `predict.py` file in the same directory.
@@ -70,7 +79,7 @@ Sample code can be found here:
 Edit the following variables in `preprocess_captcha.py` before using:
 
 ```python
-CAPTCHA_URL = "https://example.com/captcha"  # Full URL to fetch the CAPTCHA image 
+CAPTCHA_URL = "https://target.site/captcha"  # Full URL to fetch the CAPTCHA image 
 USE_PYTORCH = False  # True: use custom PyTorch model, False: use Tesseract OCR  
 COOKIES = {
     "JSESSIONID": "your-session-id-here",  # Must match SQLmap's --cookie value  
@@ -92,13 +101,13 @@ sqlmap -u https://target.site/form \
   -v 6
 ```
 - `--data`: string should reflect the actual POST structure of the target site.
-- `--cookie`: Should match the cookie in `preprocess_captcha.py`
-- `-v 6`: lets you view full HTTP traffic to debug OCR CAPTCHA behavior.  
+- `--cookie`: Should match the `COOKIES` variable in `preprocess_captcha.py`
+- `-v 6`: view full HTTP traffic to debug OCR CAPTCHA behavior.  
 
 ![Example](docs/process.png)
 
-SQLmap will call your preprocess() function before each request. e.g.
-`username=testuser&action=submit&captcha=1A2BC`
+SQLmap will call the preprocess() function before each request to append `&captcha=RECOGNIZED_TEXT` to the POST data.  
+e.g. `username=testuser&action=submit&captcha=1A2BC`
 
 
 ---
@@ -137,10 +146,10 @@ This project is licensed under the MIT License.
 
 ## Disclaimer
 
-This script is intended for educational and ethical penetration testing purposes only.  
+This program is intended for educational and ethical penetration testing purposes only.  
 Do **not** use it against systems you do not have explicit permission to test.  
 
 本程式僅供教育用途及合法授權的滲透測試使用，  
-旨在促進資安環境的改善與提升安全性，  
-請勿用於未經授權的系統或任何非法行為。
+其開發目的是為了促進資訊安全意識與技術提升，  
+請勿用於未經授權的系統或從事任何非法行為，違者後果自負。
 
